@@ -4,7 +4,6 @@
 #include <filesystem>
 #include <vector>
 
-
 void searchLogsByName(std::string path, std::string fileName, std::string device, bool& isEmpty, int i){
 	std::fstream readFile;
 	readFile.open(path);
@@ -16,7 +15,6 @@ void searchLogsByName(std::string path, std::string fileName, std::string device
 		if (str.length() == 0 || str.find("garbage") != -1) {
 			continue;
 		}
-		
 
 		for (int i = 0; i < str.length(); i++){ 
 			if(str[i] == ':') {

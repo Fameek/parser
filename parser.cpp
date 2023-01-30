@@ -4,59 +4,69 @@
 #include <filesystem>
 #include <vector>
 
-void searchLogs(std::string path, std::string fileName, std::string device, bool& isEmpty){
+
+void searchLogsByName(std::string path, std::string fileName, std::string device, bool& isEmpty, int i){
 	std::fstream readFile;
 	readFile.open(path);
 
-	while (!readFile.eof()){
-		std::string info, time, second = "0", str, deviceName;
+	while (!readFile.eof()){ 
+		std::string info, time, second, str, deviceName;
 		int index = 0;
 		getline(readFile, str);
+		if (str.length() == 0 || str.find("garbage") != -1) {
+			continue;
+		}
+		
 
-		for (int i = 0; i < str.length(); i++){
+		for (int i = 0; i < str.length(); i++){ 
 			if(str[i] == ':') {
 				index = i;
 				break;
 			}
 		}
-
-		second += str.substr(0, index);
+		if(index == 2) {
+			second = str.substr(0, index);
+		} else {
+			second = "0" + str.substr(0, index);
+		}
+		
 		str.replace(0, index + 1, "");
 		index = 0;
 
 		for (int i = 0; i < str.length(); i++){
 			if(str[i] == ':') {
-				index = i;
+				index = i; 
 				break;
 			}
 		}
 
-		deviceName = str.substr(0, index);
+		deviceName = str.substr(0, index); 
 		if (deviceName != device) {
 			continue;
 		}
-		
 		str.replace(0, index + 1, "");
 		info = str;
 		isEmpty = false;
 		time = fileName.substr(5, fileName.length() - 10);
-		std::cout << "DATA | " << time << "-" << second << " | INFO | " << info << std::endl;
+		std::cout << i << " DATA | " << time << "-" << second << " | INFO | " << info << std::endl;
 	}
 	readFile.close();
 }
 
 int main() {
-	std::string path, device; std::cin >> device; std::cin >> path;
+	std::string path, device;
+	std::cout << "Enter device name: "; getline(std::cin, device);
+	std::cout << "Enter path:"; getline(std::cin, path);
 
 	std::vector<std::string> v_pathFile;
 	std::vector<std::string> v_File;
 	bool isEmpty = true;
 	try {
 		for (auto& pointer : std::filesystem::directory_iterator(path)) {
-		auto fileName = pointer.path().filename().string();
-		auto pathFile = pointer.path().string();
-		v_pathFile.push_back(pathFile);
-		v_File.push_back(fileName);
+			auto fileName = pointer.path().filename().string();
+			auto pathFile = pointer.path().string();
+			v_pathFile.push_back(pathFile);
+			v_File.push_back(fileName);
 		}
 	}
 	catch(const std::exception e) {
@@ -65,7 +75,7 @@ int main() {
 	}
 
 	for (int i = 0; i < v_File.size(); i++) {
-		searchLogs(v_pathFile[i], v_File[i], device, isEmpty);
+		searchLogsByName(v_pathFile[i], v_File[i], device, isEmpty, i);
 	}
 
 	if(isEmpty) {
